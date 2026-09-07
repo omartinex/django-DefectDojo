@@ -160,5 +160,4 @@ MEMORY.md
 !.claude/hooks/
 !.claude/skills/
 .claude/settings.local.json
-CLAUDE.md
 CLAUDE.local.md
