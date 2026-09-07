@@ -24,8 +24,11 @@
       completar aquí: comandos exactos para tests, lint, migraciones, y levantar el entorno local.
 
 ## Remotes de git
-- `origin` → tu fork
+- `origin` → `https://github.com/omartinex/django-DefectDojo` (tu fork)
 - `upstream` → `https://github.com/DefectDojo/django-DefectDojo` (para sync periódico)
+- **Rama principal: `master`** (no `main` — heredado del repo original de DefectDojo). Cualquier
+  agente que abra este repo debe asumir `master` como base para ramas nuevas y para el sync con
+  upstream.
 
 ## Roadmap / Tracks activos
 1. **[ACTIVO] SSO revival** — Recuperar soporte de SAML/OIDC (específicamente login vía Azure
