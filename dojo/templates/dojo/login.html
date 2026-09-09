@@ -113,6 +113,12 @@
                 </div>
             {% endif %}
 
+            {% comment %}
+            SHOW_LOGIN_FORM (dojo/sso/settings.py) hides the local username/password form
+            on SSO-only deployments. ?force_login_form always brings it back, so an IdP
+            outage never locks everyone out.
+            {% endcomment %}
+            {% if SHOW_LOGIN_FORM or "force_login_form" in request.GET %}
             <form method="POST" autocomplete="off"> {% csrf_token %}
                 {% include "dojo/form_fields.html" with form=form %}
 
@@ -137,6 +143,11 @@
                     {% endif %}
                 {% endif %}
             </form>
+            {% endif %}
+
+            {% if SSO_AVAILABLE %}
+                {% include "dojo/sso_login_buttons_tailwind.html" %}
+            {% endif %}
         </div>
     </div>
 {% endblock %}

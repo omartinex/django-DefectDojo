@@ -31,6 +31,8 @@ from dojo.notifications.settings import (
 from dojo.notifications.settings import (
     populate_settings as _populate_notifications_settings,
 )
+from dojo.sso.settings import SSO_ENV_SCHEMA
+from dojo.sso.settings import apply_sso_settings as _apply_sso_settings
 
 logger = logging.getLogger(__name__)
 
@@ -301,6 +303,8 @@ env = environ.FileAwareEnv(
     DD_SETTINGS_CACHE_L1_TTL=(int, 30),
     # Notification env-vars (SLA notify, alert refresh/counter/cap, system-level trump). Defined in dojo.notifications.settings.
     **NOTIFICATIONS_ENV_DEFAULTS,
+    # SSO env-vars (DD_SOCIAL_AUTH_*, per-provider enable/key/secret). Defined in dojo.sso.settings.
+    **SSO_ENV_SCHEMA,
 )
 
 
@@ -1710,6 +1714,13 @@ LOGGING = {
             "level": str(LOG_LEVEL),
             "propagate": False,
         },
+        "social_core": {
+            # SSO backends (dojo/sso/). Diagnosing a failed OIDC handshake is very hard
+            # without social-core's own logging.
+            "handlers": [rf"{LOGGING_HANDLER}"],
+            "level": str(LOG_LEVEL),
+            "propagate": False,
+        },
     },
 }
 
@@ -1968,4 +1979,24 @@ if DEBUG:
 
 #########################################################################################################
 # End of Auditlog configuration                                                                          #
+#########################################################################################################
+
+#########################################################################################################
+# SSO configuration                                                                                     #
+#########################################################################################################
+
+# MUST stay at the very end of this file. apply_sso_settings appends
+# CustomSocialAuthExceptionMiddleware to MIDDLEWARE, and MIDDLEWARE is *rebound*
+# (MIDDLEWARE = [...], not .append) several times above — including in the
+# DJANGO_DEBUG_TOOLBAR_ENABLED block. Calling this any earlier silently drops the
+# middleware, which leaves social-auth failures rendering a 500 instead of redirecting
+# back to the login form. It also overwrites AUTHENTICATION_BACKENDS and extends
+# INSTALLED_APPS / TEMPLATES.
+#
+# Every provider defaults to disabled, so with no DD_SOCIAL_AUTH_* env vars set the
+# login behaviour is unchanged from a build without this module.
+_apply_sso_settings(env, globals())
+
+#########################################################################################################
+# End of SSO configuration                                                                              #
 #########################################################################################################

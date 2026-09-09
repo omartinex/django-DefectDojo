@@ -20,19 +20,22 @@ aliases:
   - /admin/user_management/configure_sso/
   - /admin/sso/os__saml/
   - /admin/sso/os__auth0/
-  - /admin/sso/os__azure_ad/
   - /admin/sso/os__github_enterprise/
   - /admin/sso/os__gitlab/
   - /admin/sso/os__google/
   - /admin/sso/os__keycloak/
-  - /admin/sso/os__oidc/
   - /admin/sso/os__okta/
   - /admin/sso/os__remote_user/
 ---
 
-Single Sign-On is a **DefectDojo Pro** feature. As of DefectDojo 3.0, the SSO surface — SAML, OIDC, and the bundled OAuth providers — is available only in DefectDojo Pro. Open-source DefectDojo uses local username/password login and the password-reset flow.
+Upstream DefectDojo moved the whole SSO surface to DefectDojo Pro in 3.0. This build restores part of it: **OAuth2/OIDC login** works in the open-source edition, covering [OIDC](/admin/sso/os__oidc/) (the recommended route for Microsoft Entra ID) and [Azure Active Directory](/admin/sso/os__azure_ad/), plus the Google, Okta, Auth0, GitLab, Keycloak and GitHub Enterprise backends.
 
-If you're running open-source DefectDojo and want SSO, you'll need to switch to [DefectDojo Pro](https://defectdojo.com); the migration is covered in the [3.0 upgrade notes](/releases/os_upgrading/3.0/#sso-providers-are-available-in-defectdojo-pro-only). Existing user accounts and group memberships are preserved on upgrade. For access control on open-source DefectDojo, see the [Authorized Users](/admin/user_management/os__authorized_users/) page.
+Two things from DefectDojo 2.x are **not** restored:
+
+- **SAML and REMOTE_USER.** Neither is available; only the OAuth2/OIDC backends are.
+- **Group mapping.** Identity-provider groups are not mapped onto DefectDojo User Groups, so the `..._GET_GROUPS`, `..._GROUPS_FILTER` and `..._CLEANUP_GROUPS` settings have no effect. Access control is via [Authorized Users](/admin/user_management/os__authorized_users/).
+
+Users are matched by username, and by default a first successful login creates the local account (`DD_SOCIAL_AUTH_CREATE_USER`). New accounts start with no product access.
 
 ## Seeing what is configured
 

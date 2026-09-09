@@ -12,35 +12,46 @@
                 </div>
             {% endif %}
 
-            {% include "dojo/form_fields.html" with form=form %}
+            {% comment %}
+            SHOW_LOGIN_FORM (dojo/sso/settings.py) hides the local username/password form
+            on SSO-only deployments. ?force_login_form always brings it back, so an IdP
+            outage never locks everyone out.
+            {% endcomment %}
+            {% if SHOW_LOGIN_FORM or "force_login_form" in request.GET %}
+                {% include "dojo/form_fields.html" with form=form %}
 
-            <!-- Button -->
-            <div class="form-group">
-                <div class="col-sm-offset-1 col-sm-2">
-                    <button class="btn" id="toggleBox" onclick="togglePassVisibility()" type="button">
-                        <i class="fa-solid fa-eye"></i>
-                        {% trans "Show Password" %}
-                    </button>
-                </div>
-
-                {% if CLASSIC_AUTH_ENABLED %}
+                <!-- Button -->
+                <div class="form-group">
                     <div class="col-sm-offset-1 col-sm-2">
-                        <button class="btn btn-success">{% trans "Login" %}</button>
+                        <button class="btn" id="toggleBox" onclick="togglePassVisibility()" type="button">
+                            <i class="fa-solid fa-eye"></i>
+                            {% trans "Show Password" %}
+                        </button>
                     </div>
-                    {% if FORGOT_PASSWORD or FORGOT_USERNAME %}
-                        <div class="col-sm-4">
-                            <ul style="list-style-type: none">
-                                {% if FORGOT_PASSWORD %}
-                                    <li><a id="reset-password" href="{% url 'password_reset' %}">{% trans "I forgot my password" %}</a></li>
-                                {% endif %}
-                                {% if FORGOT_USERNAME %}
-                                    <li><a id="forgot-username" href="{% url 'forgot_username' %}">{% trans "I forgot my username" %}</a></li>
-                                {% endif %}
-                            </ul>
+
+                    {% if CLASSIC_AUTH_ENABLED %}
+                        <div class="col-sm-offset-1 col-sm-2">
+                            <button class="btn btn-success">{% trans "Login" %}</button>
                         </div>
+                        {% if FORGOT_PASSWORD or FORGOT_USERNAME %}
+                            <div class="col-sm-4">
+                                <ul style="list-style-type: none">
+                                    {% if FORGOT_PASSWORD %}
+                                        <li><a id="reset-password" href="{% url 'password_reset' %}">{% trans "I forgot my password" %}</a></li>
+                                    {% endif %}
+                                    {% if FORGOT_USERNAME %}
+                                        <li><a id="forgot-username" href="{% url 'forgot_username' %}">{% trans "I forgot my username" %}</a></li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        {% endif %}
                     {% endif %}
-                {% endif %}
-            </div>
+                </div>
+            {% endif %}
+
+            {% if SSO_AVAILABLE %}
+                {% include "dojo/sso_login_buttons.html" %}
+            {% endif %}
         </fieldset>
     </form>
 {% endblock %}

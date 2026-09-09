@@ -38,6 +38,7 @@ from dojo.forms import (
 )
 from dojo.labels import get_labels
 from dojo.models import Alerts, Dojo_User, Product, Product_Type, UserContactInfo
+from dojo.sso.views import get_sso_auto_redirect
 from dojo.user.authentication import reset_token_for_user
 from dojo.user.ui.filters import UserFilter
 from dojo.user.ui.forms import (
@@ -121,11 +122,28 @@ def api_v2_key(request):
 @dojo_ratelimit(key="post:username")
 @dojo_ratelimit(key="post:password")
 def login_view(request):
+    # Go straight to the provider when SSO is the only configured way in. Returns None
+    # — and so falls through to the local form — in every other case, ?force_login_form
+    # included.
+    redirect_response = get_sso_auto_redirect(request)
+    if redirect_response is not None:
+        return redirect_response
     return DojoLoginView.as_view(template_name="dojo/login.html", authentication_form=AuthenticationForm)(request)
 
 
 def logout_view(request):
     logout(request)
+
+    # With the local form hidden there is nothing to show on /login but the provider
+    # buttons, so render the login page in place rather than redirecting to it with a
+    # "logged out successfully" message attached to an empty form.
+    # NOTE: this is 2.58.4 behaviour, kept as-is. When SOCIAL_LOGIN_AUTO_REDIRECT is also
+    # on, login_view() bounces straight back to the IdP, so logging out of DefectDojo
+    # alone is not possible — the IdP session has to end too. /logout?force_login_form is
+    # the way out.
+    if not settings.SHOW_LOGIN_FORM:
+        return login_view(request)
+
     messages.add_message(request,
                      messages.SUCCESS,
                      _("You have logged out successfully."),

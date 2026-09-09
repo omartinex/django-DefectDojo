@@ -71,6 +71,7 @@ from dojo.reports.ui.urls import urlpatterns as reports_urls
 from dojo.risk_acceptance.api.urls import add_risk_acceptance_urls
 from dojo.search.urls import urlpatterns as search_urls
 from dojo.sla_config.urls import urlpatterns as sla_urls
+from dojo.sso.urls import urlpatterns as sso_urlpatterns
 from dojo.survey.ui.urls import urlpatterns as survey_urls
 from dojo.system_settings.api.urls import add_system_settings_urls
 from dojo.system_settings.ui.urls import urlpatterns as system_settings_urls
@@ -251,6 +252,9 @@ urlpatterns += survey_urls
 if hasattr(settings, "DJANGO_METRICS_ENABLED"):
     if settings.DJANGO_METRICS_ENABLED:
         urlpatterns += [re_path(r"^{}django_metrics/".format(get_system_setting("url_prefix")), include("django_prometheus.urls"))]
+
+#  /login/<backend>/ and /complete/<backend>/ for the SSO providers (dojo/sso/)
+urlpatterns += sso_urlpatterns
 
 if hasattr(settings, "DJANGO_ADMIN_ENABLED"):
     if settings.DJANGO_ADMIN_ENABLED:
